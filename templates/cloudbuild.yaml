@@ -1,0 +1,43 @@
+steps:
+  # [HOOK: beforeDeploy]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "validate-environment"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        source /workspace/cht-utils.sh
+        validate_environment "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+
+  # [HOOK: beforeBuild]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-image"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        source /workspace/cht-utils.sh
+        build_and_push_image "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+
+  # [HOOK: beforeServiceDeploy]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "deploy"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        source /workspace/cht-utils.sh
+        deploy_to_cloud_run "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+
+  # [HOOK: afterDeploy]
+
+substitutions:
+  _APP_VERSION: "TEST"
+  _REGION: "us-central1"
+  _REPOSITORY: "cloud-run-source-deploy"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

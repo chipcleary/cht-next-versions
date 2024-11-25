@@ -1,0 +1,31 @@
+{
+  "name": "@cht/next-versions",
+  "version": "0.1.0",
+  "description": "Automated deployment of multiple Next.js app versions to Google Cloud Run",
+  "main": "src/index.js",
+  "files": [
+    "src",
+    "templates"
+  ],
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "nextjs",
+    "google-cloud",
+    "deployment"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "peerDependencies": {
+    "next": ">=13.0.0"
+  }
+}
