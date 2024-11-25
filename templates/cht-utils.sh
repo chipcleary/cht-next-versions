@@ -100,12 +100,12 @@ deploy_to_cloud_run() {
     echo "Image: $image_path"
     echo "Service account: $service_account"
 
+    # Removed --allow-unauthenticated flag from here
     gcloud run deploy "$service_name" \
         --image="$image_path" \
         --platform=managed \
         --region="$region" \
         --service-account="$service_account" \
-        --allow-unauthenticated \
         --tag="$tag_name" \
         --set-env-vars="APP_VERSION=${version}" || exit 1
 

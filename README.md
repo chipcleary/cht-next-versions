@@ -1,12 +1,37 @@
-# Basic Example
+# CHT Next Versions
 
-Demonstrates basic usage of CHT Next Versions with a minimal Next.js application.
+Enables Vercel-like deployment workflows for Next.js applications on Google Cloud Run, providing automated versioning and preview environments.
+
+## Why This Package?
+
+While Vercel offers built-in preview deployments and automatic version management for Next.js applications, deploying to Google Cloud Run traditionally requires manual configuration and lacks native support for preview environments. This package bridges that gap.
+
+### Problems Solved
+- Creates Vercel-like preview environments on Google Cloud Run
+- Automates deployment of multiple versions (staging, production, feature branches)
+- Handles complex GCP setup automatically:
+  - Service account management
+  - IAM permissions
+  - Build configuration
+  - Deployment automation
+- Provides predictable, version-specific URLs
+- Simplifies local development integration
+
+Without this package, you'd need to manually configure service accounts, IAM roles, build processes, and deployment scripts for each version of your application. This package reduces that to a simple command:
+```bash
+npm run deploy staging    # Deploy staging version
+npm run deploy prod      # Deploy production version
+npm run deploy feature-x # Deploy feature branch
 
 ## Features
-- Simple page showing current deployment version
-- Basic deployment script
-- Multiple version deployment (staging, prod, feature branches)
-- Local development support
+Features
+
+Simple page showing current deployment version
+Automated deployment script
+Multiple version deployment (staging, prod, feature branches)
+Local development support
+Automatic service account and IAM management
+Zero-config versioning with unique URLs
 
 ## Initial Setup
 
@@ -60,14 +85,61 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 ```
 
 ### 2. Project Setup
-```bash
-# Install dependencies (removes @cht/next-versions from dependencies first)
-npm remove @cht/next-versions
-npm install
 
-# Link local package
-npm link ../../
+1. Install the package:
+```bash
+npm install @cht/next-versions
 ```
+
+2. Create a deployment script (scripts/deploy.js):
+```javascript
+#!/usr/bin/env node
+const { deploy } = require('@cht/next-versions/cli');
+deploy(process.argv[2]);
+```
+
+3. Add the deploy script to package.json:
+```json
+{
+  "scripts": {
+    "deploy": "node scripts/deploy.js"
+  }
+}
+```
+
+4. (Optional) Create a configuration file (cht-next-versions.config.js):
+```javascript
+/** @type {import('@cht/next-versions').Config} */
+module.exports = {
+  // Override default region if needed
+  // region: 'us-central1',
+
+  // Override default repository if needed
+  // repository: 'cloud-run-source-deploy',
+
+  // Add deployment hooks
+  hooks: {
+    // Run after successful deployment
+    postDeploy: async (version, url) => {
+      console.log(`Deployed ${version} to ${url}`);
+      // Add custom post-deployment steps here
+    }
+  }
+};
+```
+
+That's it! You can now deploy your app using:
+```bash
+npm run deploy staging    # Deploy staging version
+npm run deploy prod      # Deploy production version
+npm run deploy feature-x # Deploy feature branch
+```
+
+The deployment process will:
+1. Generate necessary configuration files (next.config.js, cloudbuild.yaml)
+2. Set up required Cloud Run resources
+3. Build and deploy your application
+4. Provide a unique URL for your version
 
 ## Local Development
 
