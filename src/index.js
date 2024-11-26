@@ -1,15 +1,6 @@
-const deployUtils = require('./utils/deploy-utils');
-const serviceAccountUtils = require('./utils/service-account-utils');
-const resourceUtils = require('./utils/resource-utils');
-const { processCloudBuildTemplate } = require('./build/cloudbuild-processor');
-const { processDockerfileTemplate } = require('./build/dockerfile-processor');
-const { processNextConfig } = require('./build/next-config-processor');
-
-module.exports = {
-  ...deployUtils,
-  ...serviceAccountUtils,
-  ...resourceUtils,
-  processCloudBuildTemplate,
-  processDockerfileTemplate,
-  processNextConfig
-};
+export { default as processCloudBuildTemplate } from './processors/cloudbuild-processor.js';
+export { default as processDockerfileTemplate } from './processors/dockerfile-processor.js';
+export { default as processNextConfig } from './processors/next-config-processor.js';
+export * from './utils/deploy-utils.js';
+export * from './utils/service-account-utils.js';
+export * from './utils/resource-utils.js';

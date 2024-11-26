@@ -2,7 +2,7 @@
  * Defines hook points for the deployment process
  */
 
-const defaultHooks = {
+export const defaultHooks = {
   /**
    * Called before any deployment steps begin
    * @param {Object} context Deployment context
@@ -37,14 +37,9 @@ const defaultHooks = {
  * @param {Object} customHooks User-provided hooks to merge with defaults
  * @returns {Object} Complete hooks object
  */
-function createHooks(customHooks = {}) {
+export function createHooks(customHooks = {}) {
   return {
     ...defaultHooks,
     ...customHooks
   };
 }
-
-module.exports = {
-  defaultHooks,
-  createHooks
-};

@@ -1,10 +1,8 @@
-const { execSync } = require('child_process');
-const fs = require('fs/promises');
-const {
-  processCloudBuildTemplate,
-  processDockerfileTemplate,
-  processNextConfig
-} = require('../index');
+import { execSync } from 'child_process';
+import fs from 'fs/promises';
+import processCloudBuildTemplate from '../processors/cloudbuild-processor.js';
+import processDockerfileTemplate from '../processors/dockerfile-processor.js';
+import processNextConfig from '../processors/next-config-processor.js';
 
 /**
  * Utility functions for deployment management
@@ -18,7 +16,7 @@ const {
  * @param {string} config.version - Version name
  * @returns {string} Valid Cloud Run service name
  */
-function toServiceName({ projectId, version }) {
+export function toServiceName({ projectId, version }) {
   const sanitizedVersion = version.toLowerCase();
   return `${projectId}-${sanitizedVersion}`;
 }
@@ -29,7 +27,7 @@ function toServiceName({ projectId, version }) {
  * @param {string} version - Version name
  * @returns {string} Valid service account ID
  */
-function toServiceAccountId(version) {
+export function toServiceAccountId(version) {
   return `${version.toLowerCase()}-sa`;
 }
 
@@ -41,7 +39,7 @@ function toServiceAccountId(version) {
  * @param {string} config.region - GCP region
  * @returns {string} Full service URL
  */
-function getServiceUrl({ projectId, version, region }) {
+export function getServiceUrl({ projectId, version, region }) {
   const serviceName = toServiceName({ projectId, version });
   return `https://${serviceName}-${region}.run.app`;
 }
@@ -52,7 +50,7 @@ function getServiceUrl({ projectId, version, region }) {
  * @returns {boolean} True if valid
  * @throws {Error} If version name is invalid
  */
-function validateVersionName(version) {
+export function validateVersionName(version) {
   if (version.length < 1 || version.length > 20) {
     throw new Error('Version name must be between 1 and 20 characters');
   }
@@ -72,7 +70,7 @@ function validateVersionName(version) {
  * @param {string} version - Version name
  * @returns {Promise<void>}
  */
-async function ensureGoogleCloudSetup(projectId, version) {
+export async function ensureGoogleCloudSetup(projectId, version) {
   console.log('Ensuring Google Cloud setup...');
 
   // Get project number
@@ -122,7 +120,7 @@ async function ensureGoogleCloudSetup(projectId, version) {
  * @param {string} version - Version name
  * @returns {Promise<void>}
  */
-async function grantPublicAccess(projectId, version) {
+export async function grantPublicAccess(projectId, version) {
   const serviceName = toServiceName({ projectId, version });
   console.log(`\nGranting public access to ${serviceName}...`);
 
@@ -153,7 +151,7 @@ async function grantPublicAccess(projectId, version) {
  * @param {string} projectId - GCP project ID
  * @returns {Promise<void>}
  */
-async function generateDeploymentFiles(version, projectId) {
+export async function generateDeploymentFiles(version, projectId) {
   console.log('\nGenerating deployment files...');
 
   const { cloudbuild, shellUtils } = await processCloudBuildTemplate({
@@ -195,13 +193,3 @@ async function generateDeploymentFiles(version, projectId) {
   }
   console.log('✓ Wrote deployment files\n');
 }
-
-module.exports = {
-  toServiceName,
-  toServiceAccountId,
-  getServiceUrl,
-  validateVersionName,
-  ensureGoogleCloudSetup,
-  grantPublicAccess,
-  generateDeploymentFiles
-};

@@ -8,7 +8,7 @@
  * @returns {string} Sanitized version name
  * @throws {Error} If version name is invalid
  */
-function sanitizeVersionName(version) {
+export function sanitizeVersionName(version) {
   if (!version) {
     throw new Error('Version name is required');
   }
@@ -37,7 +37,7 @@ function sanitizeVersionName(version) {
  * @returns {string} Valid Cloud Run service name
  * @throws {Error} If resulting service name would be invalid
  */
-function getCloudRunServiceName(config) {
+export function getCloudRunServiceName(config) {
   if (!config.projectId) throw new Error('Project ID is required');
 
   const { projectId, version } = config;
@@ -69,7 +69,7 @@ function getCloudRunServiceName(config) {
  * @param {string} config.repository Artifact Registry repository name
  * @returns {string} Full Docker image path
  */
-function getDockerImagePath(config) {
+export function getDockerImagePath(config) {
   const { projectId, version, region, repository } = config;
   const sanitizedVersion = sanitizeVersionName(version);
   return `${region}-docker.pkg.dev/${projectId}/${repository}/${sanitizedVersion}`;
@@ -82,7 +82,7 @@ function getDockerImagePath(config) {
  * @param {string} config.version Version name
  * @returns {string} Service account email
  */
-function getServiceAccountEmail(config) {
+export function getServiceAccountEmail(config) {
   const { projectId, version } = config;
   const sanitizedVersion = sanitizeVersionName(version);
   const saId = `${sanitizedVersion}-sa`;
@@ -103,7 +103,7 @@ function getServiceAccountEmail(config) {
  * @param {string} config.region GCP region
  * @returns {string} Service URL
  */
-function getServiceUrl(config) {
+export function getServiceUrl(config) {
   const { region } = config;
   const serviceName = getCloudRunServiceName(config);
   return `https://${serviceName}-${region}.run.app`;
@@ -119,7 +119,7 @@ function getServiceUrl(config) {
  * @returns {Object} Validated resource names
  * @throws {Error} If any resource names are invalid
  */
-function validateResourceNames(config) {
+export function validateResourceNames(config) {
   const { projectId, version, region, repository } = config;
 
   if (!projectId) throw new Error('Project ID is required');
@@ -135,12 +135,3 @@ function validateResourceNames(config) {
     serviceUrl: getServiceUrl(config)
   };
 }
-
-module.exports = {
-  sanitizeVersionName,
-  getCloudRunServiceName,
-  getDockerImagePath,
-  getServiceAccountEmail,
-  getServiceUrl,
-  validateResourceNames
-};

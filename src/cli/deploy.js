@@ -1,11 +1,8 @@
-const { loadConfig } = require('./config');
-const {
-  ensureGoogleCloudSetup,
-  grantPublicAccess,
-  generateDeploymentFiles
-} = require('../utils/deploy-utils');
-const fs = require('fs/promises');
-const { execSync } = require('child_process');
+import { loadConfig } from './config.js';
+
+import { ensureGoogleCloudSetup, grantPublicAccess, generateDeploymentFiles } from '../utils/deploy-utils.js';
+import fs from 'fs/promises';
+import { execSync } from 'child_process';
 
 async function ensureDirectories() {
   const dirs = ['public', '.next/standalone', '.next/static', 'workspace'];
@@ -18,7 +15,7 @@ async function ensureDirectories() {
  * Deploy a version of the application
  * @param {string} version Version name to deploy
  */
-async function deploy(version) {
+export async function deploy(version) {
   if (!version) {
     throw new Error('Version argument is required\nUsage: deploy <version>\nExample: deploy staging');
   }
@@ -71,4 +68,3 @@ async function deploy(version) {
   }
 }
 
-module.exports = { deploy };

@@ -1,16 +1,19 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import { join } from 'path';
+import { createRequire } from 'module';
 
-const DEFAULT_CONFIG = {
+const require = createRequire(import.meta.url);
+
+export const DEFAULT_CONFIG = {
   region: 'us-central1',
   repository: 'cloud-run-source-deploy',
   hooks: {}
 };
 
-async function loadConfig() {
+export async function loadConfig() {
   try {
     // Look for config file in current directory
-    const configPath = path.join(process.cwd(), 'cht-next-versions.config.js');
+    const configPath = join(process.cwd(), 'cht-next-versions.config.cjs');
 
     // Check if config exists
     try {
@@ -20,7 +23,7 @@ async function loadConfig() {
       return DEFAULT_CONFIG;
     }
 
-    // Load config
+    // Load config using require (for CJS)
     const userConfig = require(configPath);
 
     // Merge with defaults
@@ -38,8 +41,3 @@ async function loadConfig() {
     return DEFAULT_CONFIG;
   }
 }
-
-module.exports = {
-  loadConfig,
-  DEFAULT_CONFIG
-};

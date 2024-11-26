@@ -2,8 +2,12 @@
   "name": "@cht/next-versions",
   "version": "0.1.0",
   "description": "Automated deployment of multiple Next.js app versions to Google Cloud Run",
+  "type": "module",
+  "engines": {
+    "node": ">=14.16"
+  },
   "main": "src/index.js",
-    "exports": {
+  "exports": {
     ".": "./src/index.js",
     "./cli": "./src/cli/deploy.js"
   },

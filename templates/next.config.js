@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone'  // Required for Cloud Run deployment
+  reactStrictMode: true,
+  // ... your other config
 };
 
-export default nextConfig;
+module.exports = nextConfig;

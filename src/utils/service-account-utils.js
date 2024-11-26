@@ -7,7 +7,7 @@
  * @param {string} serviceAccount Full service account email
  * @returns {string} Shell command
  */
-function createValidateCommand(serviceAccount) {
+export function createValidateCommand(serviceAccount) {
   return `gcloud iam service-accounts describe "${serviceAccount}" >/dev/null 2>&1`;
 }
 
@@ -17,7 +17,7 @@ function createValidateCommand(serviceAccount) {
  * @param {string} displayName Display name for the service account
  * @returns {string} Shell command
  */
-function createCreateCommand(serviceAccountId, displayName) {
+export function createCreateCommand(serviceAccountId, displayName) {
   return `gcloud iam service-accounts create "${serviceAccountId}" \\
     --display-name="${displayName}"`;
 }
@@ -29,7 +29,7 @@ function createCreateCommand(serviceAccountId, displayName) {
  * @param {string} role IAM role to grant
  * @returns {string} Shell command
  */
-function createGrantRoleCommand(projectId, serviceAccount, role) {
+export function createGrantRoleCommand(projectId, serviceAccount, role) {
   return `gcloud projects add-iam-policy-binding ${projectId} \\
     --member="serviceAccount:${serviceAccount}" \\
     --role="${role}"`;
@@ -43,7 +43,7 @@ function createGrantRoleCommand(projectId, serviceAccount, role) {
  * @param {string[]} [config.roles=['roles/secretmanager.secretAccessor']] Roles to assign
  * @returns {string} Complete bash script for SA management
  */
-function generateServiceAccountScript(config) {
+export function generateServiceAccountScript(config) {
   const { projectId, version, roles = ['roles/secretmanager.secretAccessor'] } = config;
 
   // Convert version to lowercase for SA ID
@@ -97,10 +97,3 @@ echo "✓ Granted ${role}"
 echo "✓ All roles granted"
 `;
 }
-
-module.exports = {
-  createValidateCommand,
-  createCreateCommand,
-  createGrantRoleCommand,
-  generateServiceAccountScript
-};

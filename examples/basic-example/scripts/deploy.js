@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { deploy } = require('@cht/next-versions/cli');
+import { deploy } from '@cht/next-versions/cli';
 
 // Get version from command line argument
 const version = process.argv[2];
