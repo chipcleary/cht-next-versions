@@ -1,11 +1,19 @@
 #!/usr/bin/env node
+
+import { program } from 'commander';
 import { deploy } from '@cht/next-versions/cli';
+import { logger } from '@cht/next-versions';
 
-// Get version from command line argument
-const version = process.argv[2];
+program
+  .argument('<version>', 'version to deploy')
+  .option('--log-level <level>', 'logging level', 'info')
+  .action(async (version, options) => {
+    try {
+      await deploy(version, { logLevel: options.logLevel });
+    } catch (error) {
+      logger.error('Deployment failed:', error);
+      process.exit(1);
+    }
+  });
 
-// Run deployment
-deploy(version).catch(error => {
-  console.error('Deployment failed:', error);
-  process.exit(1);
-});
+program.parse();

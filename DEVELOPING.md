@@ -4,44 +4,25 @@ Internal guide for package development and maintenance.
 
 ## Core Concepts
 
-### 1. Separation of Concerns
-
-The package separates deployment logic into three layers:
-```
-Cloud Build (orchestration)
-    │
-    ├── Shell Utils (implementation)
-    │       │
-    │       └── Resource Utils (naming/validation)
-    │
-    └── Processors (template management)
-```
-
-### 2. File Organization
+### 1. File Organization
 
 ```
 src/
-├── build/              # Template processors
-│   ├── cloudbuild-processor.js
-│   ├── dockerfile-processor.js
-│   └── shell-utils-generator.js
-├── utils/              # Core utilities
-│   ├── deploy-utils.js
-│   ├── resource-utils.js
-│   └── service-account-utils.js
-└── templates/          # Base templates
-    ├── cloudbuild.yaml
-    ├── Dockerfile
-    └── cht-utils.sh
+├── cli                  # Orchestrates the process
+├── processors           # Template processors
+├── utils/*              # Core utilities
+└── templates/*          # Base templates
 ```
 
-### 3. Hook System Implementation
+### 1. Hook System Implementation
 
 Hooks are implemented at two levels:
+
 1. Cloud Build level (step injection)
 2. Shell Utils level (function injection)
 
 Key hook points:
+
 - validateEnvironment: Before environment checks
 - beforeDeploy: Before deployment starts
 - afterDeploy: After deployment completes
@@ -51,12 +32,14 @@ Key hook points:
 ### Repository Management
 
 1. Clone the repository:
+
    ```bash
    git clone git@github.com:your-org/cht-next-versions.git
    cd cht-next-versions
    ```
 
 2. Create a new branch for your changes:
+
    ```bash
    git checkout -b feature/your-feature
    ```
@@ -69,6 +52,7 @@ Key hook points:
 ### Making Changes
 
 1. Development cycle:
+
    ```bash
    # Make changes to code
    # Update tests
@@ -79,23 +63,26 @@ Key hook points:
    ```
 
 2. Before submitting PR:
+
    - Ensure all tests pass
    - Update documentation if needed
    - Consider backward compatibility
    - Add examples for new features
 
 3. Create Pull Request:
+
    - Use descriptive title
    - Reference any related issues
    - Provide context and testing instructions
 
-2. Adding Features
+4. Adding Features
+
    - Consider hook points for extensibility
    - Update documentation
    - Add examples
    - Consider backward compatibility
 
-3. Testing
+5. Testing
    - Unit tests for utilities
    - Integration tests for processors
    - Manual deployment testing
@@ -105,17 +92,16 @@ Key hook points:
 ### Adding a New Hook Point
 
 1. Add hook point in shell template:
+
 ```bash
 # [HOOK: newHookName]
 ```
 
 2. Add processor support:
+
 ```javascript
 if (config.hooks?.newHookName) {
-  content = content.replace(
-    '# [HOOK: newHookName]',
-    config.hooks.newHookName()
-  );
+  content = content.replace('# [HOOK: newHookName]', config.hooks.newHookName());
 }
 ```
 
@@ -128,10 +114,10 @@ if (config.hooks?.newHookName) {
 3. Update validation tests
 4. Update shell utils if needed
 
-
 ### Repository Tasks
 
 1. Creating a new release:
+
    ```bash
    # Update version
    npm version patch|minor|major
@@ -141,6 +127,7 @@ if (config.hooks?.newHookName) {
    ```
 
 2. Branch management:
+
    ```bash
    # Update main
    git checkout main
@@ -162,22 +149,25 @@ if (config.hooks?.newHookName) {
    npm version patch
    git push origin hotfix/description
    # Create PR for hotfix
+   ```
 
 ## Testing
 
 ### Running Tests
+
 ```bash
 # Full test suite
 npm test
 
 # Single test file
-npm test -- src/utils/__tests__/resource-utils.test.js
+npm test -- src/utils/__tests__/name-utils.test.js
 
 # Watch mode
 npm test -- --watch
 ```
 
 ### Test Organization
+
 - `__tests__/` directories alongside source
 - Unit tests for utilities
 - Integration tests for processors
@@ -186,11 +176,13 @@ npm test -- --watch
 ## Release Process
 
 1. Update version:
+
    ```bash
    npm version patch|minor|major
    ```
 
 2. Run tests:
+
    ```bash
    npm test
    ```
@@ -203,12 +195,15 @@ npm test -- --watch
 ## Future Development
 
 ### Planned Features
+
 - Config management integration
 - Custom domain support
 - Additional cloud providers
 
 ### Extension Points
+
 The package is designed for extension through:
+
 1. Hook system
 2. Template customization
 3. Resource naming utilities

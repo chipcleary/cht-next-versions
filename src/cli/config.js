@@ -1,43 +1,41 @@
 import fs from 'fs/promises';
 import { join } from 'path';
 import { createRequire } from 'module';
+import { logger } from '../logging/logger.js';
 
 const require = createRequire(import.meta.url);
 
 export const DEFAULT_CONFIG = {
   region: 'us-central1',
   repository: 'cloud-run-source-deploy',
-  hooks: {}
+  hooks: {},
 };
 
 export async function loadConfig() {
   try {
-    // Look for config file in current directory
     const configPath = join(process.cwd(), 'cht-next-versions.config.cjs');
-
-    // Check if config exists
     try {
       await fs.access(configPath);
+      logger.debug(`(loadConfig) ${configPath}`);
     } catch {
-      console.log('No config file found, using defaults.');
+      logger.info('(loadConfig) No config file found, using defaults.');
       return DEFAULT_CONFIG;
     }
-
-    // Load config using require (for CJS)
     const userConfig = require(configPath);
-
-    // Merge with defaults
-    return {
+    logger.debug('(loadConfig) Loaded user config:', userConfig);
+    const mergedConfig = {
       ...DEFAULT_CONFIG,
       ...userConfig,
       hooks: {
         ...DEFAULT_CONFIG.hooks,
-        ...userConfig.hooks
-      }
+        ...userConfig.hooks,
+      },
     };
+    logger.debug('(loadConfig) Merged config:', mergedConfig);
+    return mergedConfig;
   } catch (error) {
-    console.warn('Error loading config:', error.message);
-    console.log('Using default configuration.');
+    logger.warn(`(loadConfig) Error loading config: ${error.message}`);
+    logger.warn('(loadConfig) Using default configuration.');
     return DEFAULT_CONFIG;
   }
 }

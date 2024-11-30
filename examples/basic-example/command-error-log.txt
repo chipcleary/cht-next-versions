@@ -1,0 +1,6 @@
+Error: Command failed: gcloud beta builds submit --config=cloudbuild.yaml
+    at checkExecSyncError (node:child_process:890:11)
+    at execSync (node:child_process:962:15)
+    at executeCommand (file:///Users/chip/Development/Frameworks/react/cht-next-versions/src/utils/process-utils.js:24:20)
+    at executeGCloudCommand (file:///Users/chip/Development/Frameworks/react/cht-next-versions/src/utils/gcloud-utils.js:105:7)
+    at deploy (file:///Users/chip/Development/Frameworks/react/cht-next-versions/src/cli/deploy.js:63:13)

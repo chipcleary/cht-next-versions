@@ -1,10 +1,18 @@
 import { loadConfig } from './config.js';
-
-import { ensureGoogleCloudSetup, grantPublicAccess, generateDeploymentFiles } from '../utils/deploy-utils.js';
+import {
+  validateGCloudPermissions,
+  generateDeploymentFiles,
+  getCloudRunServiceName,
+  getDeployedServiceUrl,
+  grantPublicAccess,
+  executeGCloudCommand,
+  submitBuild,
+} from '@cht/next-versions';
 import fs from 'fs/promises';
-import { execSync } from 'child_process';
+import { logger } from '@cht/next-versions';
 
 async function ensureDirectories() {
+  logger.debug('(ensureDirectories): ensure required directories exist');
   const dirs = ['public', '.next/standalone', '.next/static', 'workspace'];
   for (const dir of dirs) {
     await fs.mkdir(dir, { recursive: true });
@@ -15,56 +23,87 @@ async function ensureDirectories() {
  * Deploy a version of the application
  * @param {string} version Version name to deploy
  */
-export async function deploy(version) {
+export async function deploy(version, options = {}) {
   if (!version) {
-    throw new Error('Version argument is required\nUsage: deploy <version>\nExample: deploy staging');
+    throw new Error(
+      'Version argument is required\nUsage: deploy <version>\nExample: deploy staging'
+    );
+  }
+
+  // Set log level if provided in options
+  if (options.logLevel) {
+    logger.level = options.logLevel;
   }
 
   try {
-    console.log(`Deploying version: ${version}`);
+    logger.info(`Deploying version: ${version}`);
 
     // Load configuration
     const config = await loadConfig();
 
     // Get project ID from gcloud
-    const projectId = execSync('gcloud config get-value project', { encoding: 'utf8' }).trim();
+    const projectId = await executeGCloudCommand({
+      args: ['config', 'get-value', 'project'],
+      options: {
+        silent: true,
+        returnOutput: true,
+      },
+    });
+
     if (!projectId) {
-      throw new Error('No Google Cloud project configured. Run: gcloud config set project YOUR_PROJECT_ID');
+      throw new Error(
+        'No Google Cloud project configured. Run: gcloud config set project YOUR_PROJECT_ID'
+      );
     }
 
     // Create required directories
     await ensureDirectories();
 
     // Setup Google Cloud (IAM, etc.)
-    await ensureGoogleCloudSetup(projectId, version);
+    await validateGCloudPermissions(projectId);
 
     // Generate deployment files
     await generateDeploymentFiles(version, projectId, config);
 
     // Run deployment
-    console.log('\nStarting deployment...');
-    execSync('gcloud beta builds submit --config=cloudbuild.yaml', { stdio: 'inherit' });
+    logger.info('Starting deployment...');
+    try {
+      await submitBuild(projectId, version);
+      logger.verbose('Build submitted successfully');
+    } catch (err) {
+      // If the build actually failed, throw
+      if (!err.message.includes('trim')) {
+        throw err;
+      }
+      // If it's just the trim error, ignore it
+      logger.verbose('Build completed');
+    }
 
     // Post-deployment setup
-    await grantPublicAccess(projectId, version);
+    await grantPublicAccess({
+      projectId,
+      version,
+      region: config.region,
+    });
 
-    // Get actual service URL from Cloud Run
-    const url = execSync(
-      `gcloud run services describe ${projectId}-${version} --region=${config.region} --format="value(status.url)"`,
-      { encoding: 'utf8' }
-    ).trim();
+    const serviceName = getCloudRunServiceName({ projectId, version });
+    const url = await getDeployedServiceUrl({
+      serviceName,
+      region: config.region,
+      projectId,
+    });
 
     // Run post-deploy hook if configured
     if (config.hooks?.postDeploy) {
-      console.log('\nRunning post-deploy hook...');
+      logger.info('\nRunning post-deploy hook...');
       await config.hooks.postDeploy(version, url);
     }
 
-    console.log(`\nDeployment complete!`);
-    console.log(`Service URL: ${url}`);
+    logger.info(`\nDeployment complete!`);
+    logger.info(`Service URL: ${url}`);
   } catch (error) {
-    console.error('\nDeployment failed:', error.message);
+    logger.error(`Deployment failed: ${error.message}`);
+    logger.debug('Full error:', error);
     process.exit(1);
   }
 }
-

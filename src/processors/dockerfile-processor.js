@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { readTemplate, replaceHooks } from './processor-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,11 +26,9 @@ const __dirname = dirname(__filename);
 export default async function processDockerfileTemplate(options = {}) {
   const { hooks = {} } = options;
 
-  // Read template
   const templatePath = join(__dirname, '../../templates/Dockerfile');
-  let content = await fs.readFile(templatePath, 'utf8');
+  let content = await readTemplate(templatePath);
 
-  // Replace hook points with actual content
   const hookReplacements = {
     '# [HOOK: additionalStages]': hooks.additionalStages?.join('\n') || '',
     '# [HOOK: afterDeps]': hooks.afterDeps?.join('\n') || '',
@@ -41,10 +39,7 @@ export default async function processDockerfileTemplate(options = {}) {
     '# [HOOK: additionalCopy]': hooks.additionalCopy?.join('\n') || '',
   };
 
-  // Replace each hook point
-  for (const [hookPoint, replacement] of Object.entries(hookReplacements)) {
-    content = content.replace(hookPoint, replacement);
-  }
+  content = replaceHooks(content, hookReplacements);
 
   return content;
 }

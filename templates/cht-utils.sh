@@ -91,6 +91,12 @@ deploy_to_cloud_run() {
     local sa_id="${sanitized_version}-sa"
     local service_account="${sa_id}@${project_id}.iam.gserviceaccount.com"
 
+    # Print debug information
+    echo "Sanitized Version: $sanitized_version"
+    echo "Project ID: $project_id"
+    echo "Service Account Email: $service_account"
+    echo "Setup call: setup_service_account "$service_account" "$sa_id" "$service_name" || exit 1"
+
     print_section "DEPLOY" "Service Account Setup"
     setup_service_account "$service_account" "$sa_id" "$service_name" || exit 1
 

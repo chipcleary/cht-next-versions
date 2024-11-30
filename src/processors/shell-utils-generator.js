@@ -1,71 +1,50 @@
-/**
- * Generates deployment shell utilities
- */
-
-import fs from 'fs/promises';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { readTemplate, replaceHooks } from './processor-utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
- * Configuration object for shell util functions
- * @typedef {Object} ShellConfig
- * @property {Object} hooks Optional hooks for customizing shell functions
- * @property {Function} hooks.validateEnvironment Additional environment validation
- * @property {Function} hooks.beforeDeploy Additional pre-deployment steps
- * @property {Function} hooks.afterDeploy Additional post-deployment steps
- */
-
-/**
  * Generates the complete shell utilities script
- * @param {ShellConfig} config Configuration options
+ * @param {Object} config Configuration options
+ * @param {Object} config.hooks Optional hooks for customizing shell functions
+ * @param {Function} config.hooks.validateEnvironment Additional environment validation
+ * @param {Function} config.hooks.beforeDeploy Additional pre-deployment steps
+ * @param {Function} config.hooks.afterDeploy Additional post-deployment steps
  * @returns {Promise<string>} Generated shell script content
  */
-export async function generateShellUtils(config = {}) {
-  // Read the base shell utils template
+export const generateShellUtils = async (options = {}) => {
+  const { hooks = {}, projectId, version, region, repository } = options;
+  const context = { projectId, version, region, repository };
+
+  const hookReplacements = {
+    '# [HOOK: validateEnvironment]': hooks.validateEnvironment
+      ? await hooks.validateEnvironment(context)
+      : '',
+    '# [HOOK: beforeDeploy]': hooks.beforeDeploy ? await hooks.beforeDeploy(context) : '',
+    '# [HOOK: afterDeploy]': hooks.afterDeploy ? await hooks.afterDeploy(context) : '',
+  };
+
   const templatePath = join(__dirname, '../../templates/cht-utils.sh');
-  let content = await fs.readFile(templatePath, 'utf8');
-
-  // Insert any additional validation from hooks
-  if (config.hooks?.validateEnvironment) {
-    content = content.replace(
-      '# [HOOK: validateEnvironment]',
-      config.hooks.validateEnvironment()
-    );
-  }
-
-  // Add any pre-deployment steps
-  if (config.hooks?.beforeDeploy) {
-    content = content.replace(
-      '# [HOOK: beforeDeploy]',
-      config.hooks.beforeDeploy()
-    );
-  }
-
-  // Add any post-deployment steps
-  if (config.hooks?.afterDeploy) {
-    content = content.replace(
-      '# [HOOK: afterDeploy]',
-      config.hooks.afterDeploy()
-    );
-  }
-
-  return content;
-}
+  const template = await readTemplate(templatePath);
+  return replaceHooks(template, hookReplacements);
+};
 
 /**
  * Writes shell utilities to the workspace
  * @param {string} workspacePath Path to deployment workspace
- * @param {ShellConfig} config Configuration options
+ * @param {Object} config Configuration options
  * @returns {Promise<void>}
  */
-export async function writeShellUtils(workspacePath, config = {}) {
+export const writeShellUtils = async (workspacePath, config = {}) => {
   const content = await generateShellUtils(config);
-  const utilsPath = path.join(workspacePath, 'cht-utils.sh');
+  const utilsPath = join(workspacePath, 'cht-utils.sh');
 
-  await fs.writeFile(utilsPath, content, { mode: 0o755 }); // Make executable
+  try {
+    await fs.writeFile(utilsPath, content, { mode: 0o755 });
+  } catch (err) {
+    throw new Error(`Error writing to file at ${utilsPath}: ${err.message}`);
+  }
   return utilsPath;
-}
-
+};

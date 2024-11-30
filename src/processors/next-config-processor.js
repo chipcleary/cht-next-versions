@@ -1,52 +1,44 @@
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { readTemplate } from './processor-utils.js';
+import { logger } from '../logging/logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /**
  * Creates a Next.js configuration with Cloud Run compatibility
  * @param {Object} options Configuration options
  * @param {Object} [options.baseConfig={}] Base Next.js configuration to extend
  * @param {Function} [options.configHook] Hook for modifying final configuration
- * @returns {string} Next.js configuration content
+ * @returns {Promise<string>} Processed Next.js configuration content
  */
-export default function processNextConfig(options = {}) {
-  const { baseConfig = {}, configHook } = options;
+export default async function processNextConfig(options = {}) {
+  logger.debug('(processNextConfig) Received options:', options);
+  const { configHook, projectId, version, region, repository } = options;
+  const context = { projectId, version, region, repository };
 
-  // Start with required Cloud Run settings
-  let config = {
-    ...baseConfig,
-    output: 'standalone',
-    experimental: {
-      ...baseConfig.experimental,
-      // Use Docker container path instead of local path
-      outputFileTracingRoot: '/app'
-    },
-    // Ensure these settings for Cloud Run
-    reactStrictMode: true,
-    swcMinify: true
-  };
+  const templatePath = join(__dirname, '../../templates/next.config.js');
+  let content = await readTemplate(templatePath);
 
-  // Force standalone output
-  config.output = 'standalone';
-
-  // Allow hook to modify config but preserve critical settings
   if (configHook) {
-    const hookConfig = configHook(config);
-    config = {
-      ...hookConfig,
-      output: 'standalone' // Always force standalone
-    };
+    // Extract config object from template content
+    const configMatch = content.match(/const nextConfig = ({[\s\S]*?});/);
+    if (!configMatch) {
+      throw new Error('Could not parse config from template');
+    }
+    let config = eval('(' + configMatch[1] + ')');
+
+    logger.debug('(processNextConfig) Executing configHook');
+    const hookConfig = await configHook(config, context);
+
+    // Replace config in template
+    content = content.replace(
+      /const nextConfig = {[\s\S]*?};/,
+      `const nextConfig = ${JSON.stringify(hookConfig, null, 2)};`
+    );
   }
 
-  // Generate the configuration file content
-  const content = `/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'standalone', // Required for Cloud Run deployment
-  experimental: {
-    outputFileTracingRoot: '/app' // Docker container path
-  },
-  reactStrictMode: ${config.reactStrictMode},
-  swcMinify: ${config.swcMinify}
-};
-
-export default nextConfig;
-`;
-
+  logger.debug('(processNextConfig) Returned nextConfig.js:', content);
   return content;
 }
