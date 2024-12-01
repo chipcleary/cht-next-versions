@@ -12,11 +12,31 @@ A minimal setup showing version-based deployments. Features:
 - Deployment script using CHT Next Versions
 - Basic configuration
 
+### load-secret-example/
+
+Reads in a Google Secret Manager secret and inserts it into env. Uses that to provide a simple version-specific config utility.
+
 ## Running Examples
 
 Each example can be run in two ways:
 
-### 1. Copy to New Project
+### 1. Run Directly
+
+```bash
+# From the cht-next-versions repo (use directory for the desired example)
+cd examples/basic-example
+
+# Install dependencies
+npm install
+
+# Link main package
+npm link ../../
+
+# Deploy
+npm run deploy -- <version>
+```
+
+### 2. Copy to New Project
 
 ```bash
 # Create new project
@@ -32,31 +52,6 @@ npm install
 # Deploy
 
 npm run deploy -- <version>
+```
 
 Note: The -- is required to pass command line arguments through npm to the underlying script.
-
-##Options:
-
---log-level <level> Set logging verbosity (default: 'info')
-Available levels: error, warn, info, http, verbose, debug, silly
-
-## Examples
-npm run -- deploy staging
-npm run -- deploy -- staging --log-level debug
-```
-
-### 2. Run Directly
-
-```bash
-# From the cht-next-versions repo
-cd examples/basic-example
-
-# Install dependencies
-npm install
-
-# Link main package
-npm link ../../
-
-# Deploy
-npm run deploy staging
-```

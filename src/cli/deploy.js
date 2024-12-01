@@ -7,6 +7,7 @@ import {
   grantPublicAccess,
   executeGCloudCommand,
   submitBuild,
+  cleanupWorkspace,
 } from '@cht/next-versions';
 import fs from 'fs/promises';
 import { logger } from '@cht/next-versions';
@@ -86,6 +87,9 @@ export async function deploy(version, options = {}) {
       region: config.region,
     });
 
+    cleanupWorkspace();
+
+    // Run post-deploy hook if configured
     const serviceName = getCloudRunServiceName({ projectId, version });
     const url = await getDeployedServiceUrl({
       serviceName,
@@ -93,7 +97,6 @@ export async function deploy(version, options = {}) {
       projectId,
     });
 
-    // Run post-deploy hook if configured
     if (config.hooks?.postDeploy) {
       logger.info('\nRunning post-deploy hook...');
       await config.hooks.postDeploy(version, url);

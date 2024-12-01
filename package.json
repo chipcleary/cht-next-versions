@@ -11,9 +11,13 @@
     ".": "./src/index.js",
     "./cli": "./src/cli/deploy.js"
   },
+  "bin": {
+    "setup-gcloud-project": "./tools/setup/setup-gcloud-project.sh"
+  },
   "files": [
     "src",
-    "templates"
+    "templates",
+    "tools"
   ],
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
