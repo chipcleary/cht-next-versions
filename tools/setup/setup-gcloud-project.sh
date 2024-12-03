@@ -256,7 +256,7 @@ mkdir -p scripts
 # Find and copy the deploy.js template
 echo "Finding template location..."
 GLOBAL_NODE_MODULES="$(npm root -g)"
-TEMPLATE_PATH="${GLOBAL_NODE_MODULES}/@cht/next-versions/templates/deploy.js"
+TEMPLATE_PATH="${GLOBAL_NODE_MODULES}/@chipcleary/cht-next-versions/templates/deploy.js"
 
 # Debug output
 echo "Template path: ${TEMPLATE_PATH}"

@@ -1,4 +1,4 @@
-import { getSecret } from '@cht/next-versions';
+import { getSecret } from '@chipcleary/cht-next-versions';
 
 /** Gets and validates a secret's value
  * @param {string} projectId - GCP project ID

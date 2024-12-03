@@ -8,9 +8,9 @@ import {
   executeGCloudCommand,
   submitBuild,
   cleanupWorkspace,
-} from '@cht/next-versions';
+} from '@chipcleary/cht-next-versions';
 import fs from 'fs/promises';
-import { logger } from '@cht/next-versions';
+import { logger } from '@chipcleary/cht-next-versions';
 
 async function ensureDirectories() {
   logger.debug('(ensureDirectories): ensure required directories exist');

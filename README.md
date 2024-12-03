@@ -83,7 +83,7 @@ Before deploying your app, you need to set up your project. These are one-time t
 #### 1. Install the package:
 
 ```bash
-npm install @cht/next-versions
+npm install @chipcleary/cht-next-versions
 ```
 
 #### 2. Run the setup script:
@@ -132,7 +132,7 @@ Capture customizations in a `cht-next-versions.config.cjs` configuration file in
 This file captures "hooks" you create to customize your builds. It's not required if you don't want any customization.
 
 ```javascript
-/** @type {import('@cht/next-versions').Config} */
+/** @type {import('@chipcleary/cht-next-versions').Config} */
 module.exports = {
   // Insert your region
   region: 'us-central1',

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { deploy } from '@cht/next-versions/cli';
-import { logger } from '@cht/next-versions';
+import { deploy } from '@chipcleary/cht-next-versions/cli';
+import { logger } from '@chipcleary/cht-next-versions';
 
 try {
   const program = new Command();

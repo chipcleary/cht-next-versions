@@ -1,5 +1,5 @@
 /**
- * Build Script for @cht/next-versions
+ * Build Script for @chipcleary/cht-next-versions
  *
  * Purpose:
  * This script prepares the package for distribution by creating a clean build

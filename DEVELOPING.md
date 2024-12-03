@@ -98,7 +98,7 @@ For testing new features or changes:
 4. Test the beta release in your example apps:
    ```bash
    cd examples/your-example-app
-   npm install @cht/next-versions@beta
+   npm install @chipcleary/cht-next-versions@beta
    ```
 
 #### Production Release
@@ -142,7 +142,7 @@ If a publish fails:
 If you need to unpublish a version (within 72 hours of publishing):
 
 ```bash
-npm unpublish @cht/next-versions@<version>
+npm unpublish @chipcleary/cht-next-versions@<version>
 ```
 
 ### Adding a New Hook Point
