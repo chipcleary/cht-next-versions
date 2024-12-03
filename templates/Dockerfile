@@ -1,8 +1,12 @@
 # Build stage
 FROM node:18-alpine AS deps
 WORKDIR /app
+# Add .npmrc before installing packages
+RUN echo "@chipcleary:registry=https://npm.pkg.github.com" > .npmrc
 COPY package*.json ./
 RUN npm install
+# Delete .npmrc to keep it out of the image
+RUN rm .npmrc
 
 FROM node:18-alpine AS builder
 WORKDIR /app
