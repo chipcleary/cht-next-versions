@@ -17,8 +17,10 @@ steps:
       - |
         source /workspace/cht-utils.sh
         echo "Starting build-image"
-        echo "build_and_push_image \"${PROJECT_ID}\" \"${_APP_VERSION}\" \"${_REGION}\" \"${_REPOSITORY}\""
-        build_and_push_image "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+        echo "build_and_push_image \"${PROJECT_ID}\" \"${_APP_VERSION}\" \"${_REGION}\" \"${_REPOSITORY}\" \"$$GITHUB_PACKAGES_TOKEN\""
+        build_and_push_image "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}" "$$GITHUB_PACKAGES_TOKEN"
+    secretEnv:
+      - GITHUB_PACKAGES_TOKEN
   - name: gcr.io/cloud-builders/gcloud
     id: deploy
     entrypoint: bash
@@ -35,3 +37,7 @@ substitutions:
   _REPOSITORY: cloud-run-source-deploy
 options:
   logging: CLOUD_LOGGING_ONLY
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/GITHUB_PACKAGES_TOKEN/versions/latest
+      env: GITHUB_PACKAGES_TOKEN

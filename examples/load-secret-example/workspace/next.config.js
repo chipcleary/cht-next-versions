@@ -1,14 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  "output": "standalone",
-  "experimental": {
-    "outputFileTracingRoot": "/app"
+  output: 'standalone', // Required for Cloud Run deployment
+  experimental: {
+    outputFileTracingRoot: '/app', // Docker container path
   },
-  "reactStrictMode": true,
-  "swcMinify": true,
-  "env": {
-    "APP_CONFIG": "{\n  \"HELLO\": \"world\",\n  \"NEXT_PUBLIC_HELLO\": \"mom\"\n}"
-  }
+  reactStrictMode: true,
+  swcMinify: true,
 };
 
 export default nextConfig;

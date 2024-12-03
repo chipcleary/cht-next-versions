@@ -8,4 +8,4 @@ export * from './utils/iam-utils.js';
 export * from './utils/name-utils.js';
 export * from './utils/process-utils.js';
 export * from './utils/secret-utils.js';
-export { logger } from './logging/logger.js';
+export * from './logging/logger.js';

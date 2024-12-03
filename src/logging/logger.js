@@ -1,4 +1,4 @@
-import winston from 'winston';
+import log from 'loglevel';
 
 let loggerInstance = null;
 
@@ -7,19 +7,8 @@ function createLogger() {
     return loggerInstance;
   }
 
-  loggerInstance = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.printf(({ timestamp, level, message, ...meta }) => {
-        return `[${timestamp}] [${level.toUpperCase()}] ${message} ${
-          Object.keys(meta).length ? JSON.stringify(meta) : ''
-        }`;
-      })
-    ),
-    transports: [new winston.transports.Console()],
-  });
-
+  loggerInstance = log;
+  loggerInstance.setLevel('info');
   return loggerInstance;
 }
 

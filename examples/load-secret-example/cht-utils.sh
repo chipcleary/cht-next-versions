@@ -61,6 +61,7 @@ build_and_push_image() {
     local version="$2"
     local region="$3"
     local repository="$4"
+    local github_token="$5"  # New parameter
 
     local sanitized_version=$(sanitize_version "$version")
     local image_path="${region}-docker.pkg.dev/${project_id}/${repository}/${sanitized_version}"
@@ -68,6 +69,7 @@ build_and_push_image() {
     print_section "BUILD" "Building Docker Image"
     docker build \
         --build-arg "APP_VERSION=${version}" \
+        --build-arg "GITHUB_PACKAGES_TOKEN=${github_token}" \
         -t "$image_path" \
         --label "app-version=${version}" \
         --label "project-id=${project_id}" \

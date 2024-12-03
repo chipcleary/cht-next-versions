@@ -27,6 +27,7 @@ export function getAppConfigSecretName(version) {
  * @throws {Error} If secret is invalid JSON
  */
 export function parseSecret(secretValue) {
+  console.log('(parseSecret) secretValue:', secretValue);
   try {
     return JSON.parse(secretValue);
   } catch (error) {

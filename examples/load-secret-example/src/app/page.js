@@ -1,8 +1,16 @@
+'use client';
+
 import { parseSecret } from '../config/secrets';
 
 export default function Home() {
   const isLocal = !process.env.APP_VERSION;
   const version = process.env.APP_VERSION || 'local';
+
+  console.log('(Home) version:', process.env.APP_VERSION);
+  console.log('(Home) secret:', process.env.APP_CONFIG);
+
+  //  const secret = parseSecret(process.env.APP_CONFIG, 'APP_VERSION', version);
+  //  console.log("Loaded Secret:", secret);
   return (
     <main className="p-8 max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold">CHT Next Versions - Load Secret Example</h1>
@@ -45,7 +53,6 @@ export default function Home() {
           <p>
             <code>process.env.APP_CONFIG:</code>
             <code>{process.env.APP_CONFIG}</code>
-            <code>{parseSecret(process.env.APP_CONFIG)}</code>
           </p>
         </div>
       )}
