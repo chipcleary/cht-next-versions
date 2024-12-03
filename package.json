@@ -1,6 +1,6 @@
 {
   "name": "@chipcleary/cht-next-versions",
-  "version": "0.0.2-beta.4",
+  "version": "0.0.2-beta.5",
   "description": "Automated deployment of multiple Next.js app versions to Google Cloud Run",
   "type": "module",
   "engines": {
