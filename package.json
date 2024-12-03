@@ -1,6 +1,6 @@
 {
   "name": "@cht/next-versions",
-  "version": "0.0.1",
+  "version": "0.0.2-beta.0",
   "description": "Automated deployment of multiple Next.js app versions to Google Cloud Run",
   "type": "module",
   "engines": {
