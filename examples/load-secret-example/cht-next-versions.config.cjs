@@ -1,14 +1,16 @@
 async function getConfig() {
-  const { initializeSecretManager, secretExists } = await import('@cht/next-versions').then(
+  const { initializeSecretManager, secretExists } = await import(
+    '@chipcleary/cht-next-versions'
+  ).then((mod) => mod);
+
+  const { getAppConfigSecret } = await import('./src/config/secrets-server.js').then((mod) => mod);
+
+  const { getAppConfigSecretName } = await import('./src/config/secrets-client.js').then(
     (mod) => mod
   );
-  const { getAppConfigSecret, getAppConfigSecretName } = await import(
-    './src/config/secrets.js'
-  ).then((mod) => mod);
 
   return {
     hooks: {
-      // Setup Secret Manager access before deployment
       validateEnvironment: async (context) => {
         const { projectId, version } = context;
         console.log('\n=== Start hook: validateEnvironment ===');
@@ -27,7 +29,6 @@ async function getConfig() {
         console.log('=== End hook: validateEnvironment ===\n');
       },
 
-      // Inject config into Next.js env
       configureNextConfig: async (config, context) => {
         const { projectId, version } = context;
         console.log('\n=== Start hook: configureNextConfig ===');
@@ -35,14 +36,50 @@ async function getConfig() {
         console.log(`CONFIG HOOK: Retrieving secret '${secretName}'...`);
         const appConfig = await getAppConfigSecret(projectId, version);
         console.log('CONFIG HOOK: Retrieved secret config successfully');
-        console.log('CONFIG HOOK: config:', appConfig);
+        console.log('CONFIG HOOK: appConfig JSON:', appConfig);
+        const parsedConfig = JSON.parse(appConfig);
+        console.log('CONFIG HOOK: parsedConfig:', parsedConfig);
+
+        const envPublicVars = Object.entries(parsedConfig)
+          .filter(([key]) => key.startsWith('NEXT_PUBLIC_'))
+          .reduce(
+            (acc, [key, value]) => ({
+              ...acc,
+              [key]: value,
+            }),
+            {}
+          );
+
+        console.log('CONFIG HOOK: public key:value pairs:', envPublicVars);
         console.log('=== End hook: configureNextConfig ===\n');
+
         return {
           ...config,
-          env: {
-            ...config.env,
-            APP_CONFIG: appConfig,
-          },
+          env:
+            process.env.NODE_ENV === 'development'
+              ? {}
+              : {
+                  ...config.env,
+                  ...envPublicVars,
+                  APP_VERSION: version,
+                },
+        };
+      },
+
+      beforeServiceDeploy: async (context) => {
+        const { projectId, version } = context;
+        console.log('\n=== Start hook: beforeServiceDeploy ===');
+        const appConfig = await getAppConfigSecret(projectId, version);
+        const parsedConfig = JSON.parse(appConfig);
+
+        const runtimeEnvVars = Object.entries(parsedConfig)
+          .filter(([key]) => !key.startsWith('NEXT_PUBLIC_'))
+          .reduce((acc, [key, value]) => `${acc}${acc ? ',' : ''}${key}=${value}`, '');
+
+        console.log('CONFIG HOOK: runtime key:value pairs:', runtimeEnvVars);
+        console.log('=== End hook: beforeServiceDeploy ===\n');
+        return {
+          environmentVariables: runtimeEnvVars,
         };
       },
     },

@@ -32,7 +32,7 @@ steps:
         echo "deploy_to_cloud_run \"${PROJECT_ID}\" \"${_APP_VERSION}\" \"${_REGION}\" \"${_REPOSITORY}\""
         deploy_to_cloud_run "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
 substitutions:
-  _APP_VERSION: staging
+  _APP_VERSION: load-secret-example
   _REGION: us-central1
   _REPOSITORY: cloud-run-source-deploy
 options:

@@ -40,20 +40,33 @@ export function sanitizeVersionName(version) {
 export function getCloudRunServiceName(config) {
   if (!config.projectId) throw new Error('Project ID is required');
 
-  const { projectId, version } = config;
+  const { projectId, version, trafficTag = 'v-1' } = config;
+
+  // Check projectId
   if (projectId.length > 30) {
     throw new Error(`Project ID "${projectId}" exceeds 30 characters`);
   }
 
   const sanitizedVersion = sanitizeVersionName(version);
-  const serviceName = `${projectId}-${sanitizedVersion}`;
+  const combinedName = `${projectId}-${sanitizedVersion}-${trafficTag}`;
 
-  // Cloud Run service names must be <= 63 characters
+  /*
+  // DEPRECATED THIS CHECK: Not needed b/c Cloud Run has stricter limits than general GCP
+  // GCP service names must be <= 63 characters
+  const serviceName = `${projectId}-${sanitizedVersion}`;
   if (serviceName.length > 63) {
     throw new Error(
       `Service name "${serviceName}" exceeds 63 characters. ` +
         `Consider using a shorter project ID (${projectId.length} chars) ` +
         `or version name (${sanitizedVersion.length} chars).`
+    );
+  }
+  */
+
+  // Check Cloud Run service name length constraints
+  if (combinedName.length > 46) {
+    throw new Error(
+      `Combined service name and traffic tag length exceeds 46 characters: ${combinedName}.`
     );
   }
 
@@ -78,11 +91,13 @@ export function getComputeServiceAccountEmail(projectNumber) {
  * @param {string} config.repository - Artifact Registry repository name
  * @returns {string} Full Docker image path
  */
+/* DEPRECATED?
 export function getDockerImagePath(config) {
   const { projectId, version, region, repository } = config;
   const sanitizedVersion = sanitizeVersionName(version);
   return `${region}-docker.pkg.dev/${projectId}/${repository}/${sanitizedVersion}`;
 }
+*/
 
 /**
  * Validates all resource names for a given configuration
@@ -94,6 +109,7 @@ export function getDockerImagePath(config) {
  * @returns {Object} Validated resource names
  * @throws {Error} If any resource names are invalid
  */
+/* DEPRECATED?
 export function validateResourceNames(config) {
   const { projectId, version, region, repository } = config;
 
@@ -109,3 +125,4 @@ export function validateResourceNames(config) {
     serviceUrl: getServiceUrl({ projectId, version, region }),
   };
 }
+*/

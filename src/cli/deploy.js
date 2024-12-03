@@ -33,7 +33,7 @@ export async function deploy(version, options = {}) {
 
   // Set log level if provided in options
   if (options.logLevel) {
-    logger.level = options.logLevel;
+    logger.setLevel(options.logLevel);
   }
 
   try {
