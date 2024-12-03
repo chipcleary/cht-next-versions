@@ -1,8 +1,12 @@
 # Build stage
 FROM node:18-alpine AS deps
 WORKDIR /app
-# Add .npmrc before installing packages
-RUN echo "@chipcleary:registry=https://npm.pkg.github.com" > .npmrc
+
+# Create .npmrc with authentication token (required by GitHub)
+ARG GITHUB_PACKAGES_TOKEN
+RUN echo "@chipcleary:registry=https://npm.pkg.github.com" > .npmrc && \
+  echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}" >> .npmrc
+
 COPY package*.json ./
 RUN npm install
 # Delete .npmrc to keep it out of the image
