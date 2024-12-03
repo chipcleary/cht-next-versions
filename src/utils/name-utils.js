@@ -48,12 +48,12 @@ export function getCloudRunServiceName(config) {
   }
 
   const sanitizedVersion = sanitizeVersionName(version);
-  const combinedName = `${projectId}-${sanitizedVersion}-${trafficTag}`;
+  const serviceName = `${projectId}-${sanitizedVersion}`;
+  const combinedName = `${serviceName}-${trafficTag}`;
 
   /*
   // DEPRECATED THIS CHECK: Not needed b/c Cloud Run has stricter limits than general GCP
   // GCP service names must be <= 63 characters
-  const serviceName = `${projectId}-${sanitizedVersion}`;
   if (serviceName.length > 63) {
     throw new Error(
       `Service name "${serviceName}" exceeds 63 characters. ` +

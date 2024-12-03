@@ -8,7 +8,7 @@ const nextConfig = {
   "swcMinify": true,
   "env": {
     "NEXT_PUBLIC_HELLO": "mom",
-    "APP_VERSION": "load-secret-example"
+    "APP_VERSION": "lse"
   }
 };
 
