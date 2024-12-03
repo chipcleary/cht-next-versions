@@ -1,0 +1,37 @@
+steps:
+  - name: gcr.io/cloud-builders/gcloud
+    id: validate-environment
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        source /workspace/cht-utils.sh
+        echo "Starting validate-environment"
+        echo "validate_environment \"${PROJECT_ID}\" \"${_APP_VERSION}\" \"${_REGION}\" \"${_REPOSITORY}\""
+        validate_environment "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+  - name: gcr.io/cloud-builders/docker
+    id: build-image
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        source /workspace/cht-utils.sh
+        echo "Starting build-image"
+        echo "build_and_push_image \"${PROJECT_ID}\" \"${_APP_VERSION}\" \"${_REGION}\" \"${_REPOSITORY}\""
+        build_and_push_image "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+  - name: gcr.io/cloud-builders/gcloud
+    id: deploy
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        source /workspace/cht-utils.sh
+        echo "Starting deploy_to_cloud_run"
+        echo "deploy_to_cloud_run \"${PROJECT_ID}\" \"${_APP_VERSION}\" \"${_REGION}\" \"${_REPOSITORY}\""
+        deploy_to_cloud_run "${PROJECT_ID}" "${_APP_VERSION}" "${_REGION}" "${_REPOSITORY}"
+substitutions:
+  _APP_VERSION: staging
+  _REGION: us-central1
+  _REPOSITORY: cloud-run-source-deploy
+options:
+  logging: CLOUD_LOGGING_ONLY

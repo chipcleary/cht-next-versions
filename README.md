@@ -111,35 +111,11 @@ To find your billing account id, run:
 gcloud billing accounts list
 ```
 
-#### 3. Create a deployment script (typically in scripts/deploy.js):
+#### 3. Update package.json to reference the deployment script
 
-This calls the package's automatic deployment functionality.
+Running the setup script will, among other things, create a deployment function at "/scripts/deploy.js".
 
-```javascript
-#!/usr/bin/env node
-
-import { program } from 'commander';
-import { deploy } from '@cht/next-versions/cli';
-import { logger } from '@cht/next-versions';
-
-program
-  .argument('<version>', 'version to deploy')
-  .option('--log-level <level>', 'logging level', 'info')
-  .action(async (version, options) => {
-    try {
-      await deploy(version, { logLevel: options.logLevel });
-    } catch (error) {
-      logger.error('Deployment failed:', error);
-      process.exit(1);
-    }
-  });
-
-program.parse();
-```
-
-#### 4. Update package.json to reference the deployment script
-
-This allows you to deploy using "npm run deploy -- `<app-version>`"
+In this step, add a script to package.json to allow you to deploy using "npm run deploy -- `<app-version>`"
 
 ```json
 {
@@ -149,7 +125,7 @@ This allows you to deploy using "npm run deploy -- `<app-version>`"
 }
 ```
 
-#### 5. (Optional) Customize your build process
+#### 4. (Optional) Customize your build process
 
 Capture customizations in a `cht-next-versions.config.cjs` configuration file in your root directory
 

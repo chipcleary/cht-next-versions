@@ -21,7 +21,7 @@ export async function loadConfig() {
       logger.info('(loadConfig) No config file found, using defaults.');
       return DEFAULT_CONFIG;
     }
-    const userConfig = require(configPath);
+    const userConfig = await require(configPath);
     logger.debug('(loadConfig) Loaded user config:', userConfig);
     const mergedConfig = {
       ...DEFAULT_CONFIG,
@@ -39,3 +39,10 @@ export async function loadConfig() {
     return DEFAULT_CONFIG;
   }
 }
+
+/* DEPRECATED?
+// Usage of loadConfig elsewhere in your code
+(async () => {
+  const config = await loadConfig();
+})();
+*/

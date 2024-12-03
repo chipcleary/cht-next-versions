@@ -114,7 +114,6 @@ export async function executeGCloudCommand({ args, options = {} }) {
     const trimmedResult = result ? result.trim() : '';
     return trimmedResult;
   } catch (error) {
-    logger.error(`(executeGCloudCommand) Error caught: ${error.message}`);
     throw new Error(`Google Cloud command failed: ${error.message}`);
   }
 }

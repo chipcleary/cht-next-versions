@@ -1,25 +1,40 @@
 {
   "name": "@cht/next-versions",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Automated deployment of multiple Next.js app versions to Google Cloud Run",
   "type": "module",
   "engines": {
     "node": ">=14.16"
   },
-  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chipcleary/cht-next-versions.git"
+  },
+  "main": "dist/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./cli": "./src/cli/deploy.js"
+    ".": "./dist/index.js",
+    "./cli": "./dist/cli/deploy.js"
   },
   "bin": {
     "setup-gcloud-project": "./tools/setup/setup-gcloud-project.sh"
   },
   "files": [
+    "dist",
     "src",
     "templates",
     "tools"
   ],
   "scripts": {
+    "build": "node tools/build.js",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "prepare": "npm run build",
+    "TODOprepublishOnly": "npm test",
+    "TODOpreversion": "npm test",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags",
+    "release:beta": "npm version prerelease --preid=beta && npm publish --tag beta",
+    "release": "npm version patch && npm publish",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"

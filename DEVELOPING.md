@@ -14,7 +14,7 @@ src/
 └── templates/*          # Base templates
 ```
 
-### 1. Hook System Implementation
+### 2. Hook System Implementation
 
 Hooks are implemented at two levels:
 
@@ -27,67 +27,123 @@ Key hook points:
 - beforeDeploy: Before deployment starts
 - afterDeploy: After deployment completes
 
-## Development Workflow
-
-### Repository Management
-
-1. Clone the repository:
-
-   ```bash
-   git clone git@github.com:your-org/cht-next-versions.git
-   cd cht-next-versions
-   ```
-
-2. Create a new branch for your changes:
-
-   ```bash
-   git checkout -b feature/your-feature
-   ```
-
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Common Development Tasks
 
 ### Making Changes
 
-1. Development cycle:
+1. Create a new branch for your changes:
 
    ```bash
-   # Make changes to code
-   # Update tests
+   git checkout -b feature/your-feature-name
+   ```
+
+2. Make your changes in the `src` directory
+
+   - All source code lives in `src/`
+   - The `dist/` directory is generated and should never be edited directly
+   - Remember to update tests as needed
+
+3. Run tests to ensure everything works:
+
+   ```bash
    npm test
-   # Commit changes with descriptive message
+   ```
+
+4. Build the package locally to verify the build process:
+
+   ```bash
+   npm run build
+   ```
+
+5. Commit your changes with meaningful commit messages:
+   ```bash
    git add .
    git commit -m "feat: description of your changes"
    ```
 
-2. Before submitting PR:
+### Creating a New Release
 
-   - Ensure all tests pass
-   - Update documentation if needed
-   - Consider backward compatibility
-   - Add examples for new features
+#### Beta Release
 
-3. Create Pull Request:
+For testing new features or changes:
 
-   - Use descriptive title
-   - Reference any related issues
-   - Provide context and testing instructions
+1. Ensure your changes are committed and you're on the main branch:
 
-4. Adding Features
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
 
-   - Consider hook points for extensibility
-   - Update documentation
-   - Add examples
-   - Consider backward compatibility
+2. Run tests and build:
 
-5. Testing
-   - Unit tests for utilities
-   - Integration tests for processors
-   - Manual deployment testing
+   ```bash
+   npm test
+   npm run build
+   ```
 
-## Common Tasks
+3. Create and publish a beta release:
+
+   ```bash
+   npm run release:beta
+   ```
+
+   This will:
+
+   - Run tests
+   - Create a new prerelease version
+   - Create a git tag
+   - Push to GitHub
+   - Publish to GitHub Packages with the 'beta' tag
+
+4. Test the beta release in your example apps:
+   ```bash
+   cd examples/your-example-app
+   npm install @cht/next-versions@beta
+   ```
+
+#### Production Release
+
+When ready to release a stable version:
+
+1. Ensure all changes are committed and you're on the main branch:
+
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+
+2. Run tests and build:
+
+   ```bash
+   npm test
+   npm run build
+   ```
+
+3. Create and publish the release:
+   ```bash
+   npm run release
+   ```
+   This will:
+   - Run tests
+   - Increment the patch version
+   - Create a git tag
+   - Push to GitHub
+   - Publish to GitHub Packages
+
+#### Troubleshooting
+
+If a publish fails:
+
+1. Check that you're logged in to the GitHub Package Registry
+2. Verify your PAT has the correct permissions
+3. Ensure all tests pass
+4. Make sure the version number hasn't already been used
+
+If you need to unpublish a version (within 72 hours of publishing):
+
+```bash
+npm unpublish @cht/next-versions@<version>
+```
 
 ### Adding a New Hook Point
 
@@ -114,43 +170,6 @@ if (config.hooks?.newHookName) {
 3. Update validation tests
 4. Update shell utils if needed
 
-### Repository Tasks
-
-1. Creating a new release:
-
-   ```bash
-   # Update version
-   npm version patch|minor|major
-
-   # Push changes and tags
-   git push origin main --tags
-   ```
-
-2. Branch management:
-
-   ```bash
-   # Update main
-   git checkout main
-   git pull origin main
-
-   # Create feature branch
-   git checkout -b feature/name
-
-   # Merge completed feature
-   git checkout main
-   git merge feature/name
-   git push origin main
-   ```
-
-3. Handling hotfixes:
-   ```bash
-   git checkout -b hotfix/description
-   # Make changes
-   npm version patch
-   git push origin hotfix/description
-   # Create PR for hotfix
-   ```
-
 ## Testing
 
 ### Running Tests
@@ -173,25 +192,6 @@ npm test -- --watch
 - Integration tests for processors
 - Separate test files for each module
 
-## Release Process
-
-1. Update version:
-
-   ```bash
-   npm version patch|minor|major
-   ```
-
-2. Run tests:
-
-   ```bash
-   npm test
-   ```
-
-3. Build and publish:
-   ```bash
-   npm publish
-   ```
-
 ## Future Development
 
 ### Planned Features
@@ -207,5 +207,3 @@ The package is designed for extension through:
 1. Hook system
 2. Template customization
 3. Resource naming utilities
-
-Consider these when adding features to maintain flexibility.

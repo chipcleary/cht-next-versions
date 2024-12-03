@@ -2,8 +2,14 @@
 node_modules/
 .npm
 
+# Distribution
+dist/
+
 # Test coverage
 coverage/
+
+# Build artifacts from examples
+.next
 
 # Logs
 logs
