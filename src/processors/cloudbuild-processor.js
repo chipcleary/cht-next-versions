@@ -1,6 +1,6 @@
 import yaml from 'yaml';
 import { join } from 'path';
-import { readTemplate } from './processor-utils.js';
+import { readTemplate, replaceHooks } from './processor-utils.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { logger } from '../logging/logger.js';
@@ -24,52 +24,46 @@ const validateParameters = (options) => {
  * Processes a cloudbuild.yaml template, injecting hooks and customizing parameters
  * @param {Object} options Processing options
  * @param {Object} options.cloudBuildHooks Hook functions for injecting steps
- * @param {string} options.projectId GCP project ID
  * @param {string} options.version Version name for deployment
  * @param {string} options.region GCP region
  * @param {string} options.repository Artifact Registry repository name
+ * @param {Object} options.context Additional context passed to hooks
  * @returns {Promise<{cloudbuild: string}>} Processed YAML and shell utils content
  */
 export default async function processCloudBuildTemplate(options) {
   logger.debug('(processCloudBuildTemplate) Received options:', options);
-  const { projectId, version, region, repository, cloudBuildHooks = {} } = options;
-  const context = { projectId, version, region, repository };
+  const { version, region, repository, cloudBuildHooks = {} } = options;
 
   validateParameters(options);
 
   const templatePath = join(__dirname, '../../templates/cloudbuild.yaml');
   let content = await readTemplate(templatePath);
 
-  // Update substitutions
+  // Hook replacements for cloudbuild.yaml
+  const hookReplacements = {
+    '# [HOOK: beforeServiceDeploy]': cloudBuildHooks.beforeServiceDeploy
+      ? await cloudBuildHooks.beforeServiceDeploy(options.context)
+      : '',
+    '# [HOOK: beforeDeploy]': cloudBuildHooks.beforeDeploy
+      ? await cloudBuildHooks.beforeDeploy(options.context)
+      : '',
+    '# [HOOK: afterDeploy]': cloudBuildHooks.afterDeploy
+      ? await cloudBuildHooks.afterDeploy(options.context)
+      : '',
+  };
+
+  // Perform replacements on the content string
+  content = replaceHooks(content, hookReplacements);
+
+  // Parse the final string back into a YAML object
   let buildConfig = yaml.parse(content);
+
+  // Update substitutions
   buildConfig.substitutions = {
     _APP_VERSION: version,
     _REGION: region,
     _REPOSITORY: repository,
   };
-
-  // Hook replacements for cloudbuild.yaml
-  const hookReplacements = {
-    '# [HOOK: beforeDeploy]': cloudBuildHooks.beforeDeploy
-      ? await cloudBuildHooks.beforeDeploy(context)
-      : '',
-    '# [HOOK: beforeBuild]': cloudBuildHooks.beforeBuild
-      ? await cloudBuildHooks.beforeBuild(context)
-      : '',
-    '# [HOOK: beforeServiceDeploy]': cloudBuildHooks.beforeServiceDeploy
-      ? await cloudBuildHooks.beforeServiceDeploy(context)
-      : '',
-    '# [HOOK: afterDeploy]': cloudBuildHooks.afterDeploy
-      ? await cloudBuildHooks.afterDeploy(context)
-      : '',
-  };
-
-  // Replace hooks in buildConfig steps
-  for (const [hookPoint, replacement] of Object.entries(hookReplacements)) {
-    if (replacement) {
-      content = content.replace(hookPoint, replacement);
-    }
-  }
 
   const yamlOptions = {
     lineWidth: 0, // Prevent line wrapping

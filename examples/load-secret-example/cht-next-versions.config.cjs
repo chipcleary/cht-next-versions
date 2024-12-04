@@ -41,8 +41,7 @@ async function getConfig() {
           .filter(([key]) => !key.startsWith('NEXT_PUBLIC_'))
           .reduce((acc, [key, value]) => `${acc}${acc ? ',' : ''}${key}=${value}`, '');
 
-        console.log('CONFIG HOOK: runtime key:value pairs:', runtimeEnvVars);
-        console.log('=== End hook: beforeServiceDeploy ===\n');
+        console.log('(beforeServiceDeploy) key-value pairs:', runtimeEnvVars);
 
         const step = {
           name: 'gcr.io/cloud-builders/gcloud',
@@ -66,6 +65,9 @@ async function getConfig() {
         };
 
         const yamlStep = yaml.stringify(step);
+        console.log('YAML step:', yamlStep);
+        console.log('=== End hook: beforeServiceDeploy ===\n');
+
         return yamlStep;
       },
     },

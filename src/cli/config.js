@@ -8,7 +8,6 @@ const require = createRequire(import.meta.url);
 export const DEFAULT_CONFIG = {
   region: 'us-central1',
   repository: 'cloud-run-source-deploy',
-  hooks: {},
 };
 
 export async function loadConfig() {
@@ -26,10 +25,6 @@ export async function loadConfig() {
     const mergedConfig = {
       ...DEFAULT_CONFIG,
       ...userConfig,
-      hooks: {
-        ...DEFAULT_CONFIG.hooks,
-        ...userConfig.hooks,
-      },
     };
     logger.debug('(loadConfig) Merged config:', mergedConfig);
     return mergedConfig;
@@ -39,10 +34,3 @@ export async function loadConfig() {
     return DEFAULT_CONFIG;
   }
 }
-
-/* DEPRECATED?
-// Usage of loadConfig elsewhere in your code
-(async () => {
-  const config = await loadConfig();
-})();
-*/
