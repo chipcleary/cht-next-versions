@@ -25,6 +25,7 @@ const validateParameters = (options) => {
  * @param {Object} options Processing options
  * @param {Object} options.cloudBuildHooks Hook functions for injecting steps
  * @param {string} options.version Version name for deployment
+ * @param {string} options.projectId GCP project ID
  * @param {string} options.region GCP region
  * @param {string} options.repository Artifact Registry repository name
  * @param {Object} options.context Additional context passed to hooks
@@ -32,7 +33,8 @@ const validateParameters = (options) => {
  */
 export default async function processCloudBuildTemplate(options) {
   logger.debug('(processCloudBuildTemplate) Received options:', options);
-  const { version, region, repository, cloudBuildHooks = {} } = options;
+  const { projectId, version, region, repository, cloudBuildHooks = {} } = options;
+  const context = { projectId, version, region, repository };
 
   validateParameters(options);
 
@@ -42,13 +44,13 @@ export default async function processCloudBuildTemplate(options) {
   // Hook replacements for cloudbuild.yaml
   const hookReplacements = {
     '# [HOOK: beforeServiceDeploy]': cloudBuildHooks.beforeServiceDeploy
-      ? await cloudBuildHooks.beforeServiceDeploy(options.context)
+      ? await cloudBuildHooks.beforeServiceDeploy(context)
       : '',
     '# [HOOK: beforeDeploy]': cloudBuildHooks.beforeDeploy
-      ? await cloudBuildHooks.beforeDeploy(options.context)
+      ? await cloudBuildHooks.beforeDeploy(context)
       : '',
     '# [HOOK: afterDeploy]': cloudBuildHooks.afterDeploy
-      ? await cloudBuildHooks.afterDeploy(options.context)
+      ? await cloudBuildHooks.afterDeploy(context)
       : '',
   };
 

@@ -21,6 +21,9 @@ const processShellUtilsTemplate = async (options = {}) => {
   const { shellUtilsHooks = {}, projectId, version, region, repository } = options;
   const context = { projectId, version, region, repository };
 
+  logger.debug(`(processShellUtilsTemplate) options: ${options}`);
+  logger.debug(`(processShellUtilsTemplate) context: ${context}`);
+
   const hookReplacements = {
     '# [HOOK: validateEnvironment]': shellUtilsHooks.validateEnvironment
       ? await shellUtilsHooks.validateEnvironment(context)

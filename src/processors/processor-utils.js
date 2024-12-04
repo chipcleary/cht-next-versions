@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import { logger } from '../logging/logger.js';
 
 /**
  * Reads the template file content
@@ -23,14 +24,18 @@ export const readTemplate = async (templatePath) => {
  */
 export const replaceHooks = (content, hookReplacements, options = { validate: false }) => {
   for (const [hookPoint, replacement] of Object.entries(hookReplacements)) {
+    logger.info(`(replaceHooks) hookpoint: ${hookPoint}`);
+
     if (options.validate && !replacement) {
       throw new Error(`Missing required hook content for ${hookPoint}`);
     }
     // Only add the replacement after the hookPoint
     if (replacement !== undefined) {
       const hookPosition = content.indexOf(hookPoint);
+      logger.info(`(replaceHooks) hookPosition: ${hookPosition}`);
       if (hookPosition !== -1) {
         const hookLineEnd = hookPosition + hookPoint.length;
+        logger.info(`(replaceHooks) hookLineEnd: ${hookLineEnd}`);
         content = content.slice(0, hookLineEnd) + '\n' + replacement + content.slice(hookLineEnd);
       }
     }

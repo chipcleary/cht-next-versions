@@ -1,4 +1,4 @@
-import { loadConfig } from './config.js';
+import { loadConfig as loadChtNextVersionsConfig } from './config.js';
 import {
   validateGCloudPermissions,
   generateDeploymentFiles,
@@ -40,7 +40,7 @@ export async function deploy(version, options = {}) {
     logger.info(`Deploying version: ${version}`);
 
     // Load configuration
-    const config = await loadConfig();
+    const config = await loadChtNextVersionsConfig();
 
     // Get project ID from gcloud
     const projectId = await executeGCloudCommand({
