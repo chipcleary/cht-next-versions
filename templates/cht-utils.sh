@@ -18,7 +18,9 @@ get_service_name() {
     echo "${project_id}-${version}"
 }
 
-# [HOOK: validateEnvironment]
+validate_environment_hook() {
+    # [HOOK: validateEnvironment]
+}
 
 # Validate environment and resources
 validate_environment() {
@@ -37,6 +39,8 @@ validate_environment() {
     echo "Service name: $service_name"
     echo "Expected URL: https://${service_name}-${region}.run.app"
 
+    validate_environment_hook # Call the hook function here
+
     print_section "VALIDATION" "Docker Repository"
     if ! gcloud artifacts repositories describe "$repository" \
         --location="$region" >/dev/null 2>&1; then
@@ -53,7 +57,9 @@ validate_environment() {
     echo "✓ Environment validation complete"
 }
 
-# [HOOK: beforeDeploy]
+before_deploy_hook() {
+    # [HOOK: beforeDeploy]
+}
 
 # Build and push Docker image
 build_and_push_image() {
@@ -75,9 +81,15 @@ build_and_push_image() {
         --label "project-id=${project_id}" \
         . || exit 1
 
+    before_deploy_hook # Call the hook function here
+
     print_section "PUSH" "Pushing Docker Image"
     docker push "$image_path" || exit 1
     echo "✓ Image built and pushed successfully"
+}
+
+after_deploy_hook() {
+    # [HOOK: afterDeploy]
 }
 
 # Deploy to Cloud Run
@@ -107,6 +119,8 @@ deploy_to_cloud_run() {
     echo "Service: $service_name"
     echo "Image: $image_path"
     echo "Service account: $service_account"
+
+    after_deploy_hook # Call the hook function here
 
     # Removed --allow-unauthenticated flag from here
     gcloud run deploy "$service_name" \
@@ -154,5 +168,3 @@ setup_service_account() {
 
     return 0
 }
-
-# [HOOK: afterDeploy]

@@ -5,6 +5,7 @@ import { getComputeServiceAccountEmail } from './name-utils.js';
 import processCloudBuildTemplate from '../processors/cloudbuild-processor.js';
 import processDockerfileTemplate from '../processors/dockerfile-processor.js';
 import processNextConfig from '../processors/next-config-processor.js';
+import processShellUtilsTemplate from '../processors/shell-utils-processor.js';
 import { logger } from '../logging/logger.js';
 
 /**
@@ -33,17 +34,24 @@ export async function generateDeploymentFiles(version, projectId, config) {
   logger.debug('(generateDeploymentFiles) called with config:', config);
 
   // Process cloudbuild template with hooks
-  //  const { cloudbuild, shellUtils } = await processCloudBuildTemplate({
-  const cloudBuildResult = await processCloudBuildTemplate({
+  const cloudbuild = await processCloudBuildTemplate({
     version,
     region: config.region,
     repository: config.repository,
     projectId,
-    hooks: config.hooks,
+    cloudBuildHooks: config.cloudBuildHooks,
   });
-  const cloudbuild = cloudBuildResult.cloudbuild;
-  const shellUtils = cloudBuildResult.shellUtils;
   logger.debug('✓ Generated cloudbuild.yaml');
+
+  // Process shell utilities template with hooks
+  const shellUtils = await processShellUtilsTemplate({
+    version,
+    region: config.region,
+    repository: config.repository,
+    projectId,
+    shellUtilsHooks: config.shellUtilsHooks,
+  });
+  logger.debug('✓ Generated cht_utils.sh');
 
   // Process Dockerfile template with hooks
   const dockerfile = await processDockerfileTemplate({
@@ -51,12 +59,12 @@ export async function generateDeploymentFiles(version, projectId, config) {
   });
   logger.debug('✓ Generated Dockerfile');
 
-  // Process next config with hooks
+  // Process next config with it's one hook
   const nextConfig = await processNextConfig({
     baseConfig: {
       output: 'standalone',
     },
-    configHook: config.hooks?.configureNextConfig,
+    configHook: config.nextConfigHooks?.configureNextConfig,
     projectId,
     version,
     region: config.region,
@@ -144,9 +152,11 @@ export async function submitBuild(projectId, version) {
  * @returns {Promise<void>}
  */
 export async function cleanupWorkspace() {
+  /* TODO: DISABLED TEMPORARILY FOR DEBUGGING
   try {
     await fs.rm('workspace', { recursive: true, force: true });
   } catch (error) {
     logger.warn(`Warning: Failed to cleanup workspace: ${error.message}`);
   }
+   */
 }

@@ -26,9 +26,13 @@ export const replaceHooks = (content, hookReplacements, options = { validate: fa
     if (options.validate && !replacement) {
       throw new Error(`Missing required hook content for ${hookPoint}`);
     }
-    // Only replace if a replacement is provided, otherwise leave the hook comment in
+    // Only add the replacement after the hookPoint
     if (replacement !== undefined) {
-      content = content.replace(hookPoint, replacement || hookPoint);
+      const hookPosition = content.indexOf(hookPoint);
+      if (hookPosition !== -1) {
+        const hookLineEnd = hookPosition + hookPoint.length;
+        content = content.slice(0, hookLineEnd) + '\n' + replacement + content.slice(hookLineEnd);
+      }
     }
   }
   return content;

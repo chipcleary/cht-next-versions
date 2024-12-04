@@ -9,8 +9,9 @@ export async function GET(request) {
     return new Response(
       JSON.stringify({
         environment: env,
-        next_public_hello: process.env.NEXT_PUBLIC_HELLO,
-        hello: process.env.HELLO,
+        next_public_hello: process.env.NEXT_PUBLIC_HELLO || '<undefined>',
+        hello: process.env.HELLO || '<undefined>',
+        processEnv: process.env,
       }),
       {
         headers: { 'Content-Type': 'application/json' },

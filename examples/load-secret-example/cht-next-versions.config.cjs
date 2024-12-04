@@ -1,3 +1,4 @@
+const yaml = require('yaml');
 async function getConfig() {
   const { initializeSecretManager, secretExists } = await import(
     '@chipcleary/cht-next-versions'
@@ -10,7 +11,7 @@ async function getConfig() {
   );
 
   return {
-    hooks: {
+    shellUtilHooks: {
       validateEnvironment: async (context) => {
         const { projectId, version } = context;
         console.log('\n=== Start hook: validateEnvironment ===');
@@ -28,7 +29,47 @@ async function getConfig() {
         console.log(`✔️ Secret '${secretName}' exists`);
         console.log('=== End hook: validateEnvironment ===\n');
       },
+    },
+    cloudBuildHooks: {
+      beforeServiceDeploy: async (context) => {
+        const { projectId, version } = context;
+        console.log('\n=== Start hook: beforeServiceDeploy ===');
+        const appConfig = await getAppConfigSecret(projectId, version);
+        const parsedConfig = JSON.parse(appConfig);
 
+        const runtimeEnvVars = Object.entries(parsedConfig)
+          .filter(([key]) => !key.startsWith('NEXT_PUBLIC_'))
+          .reduce((acc, [key, value]) => `${acc}${acc ? ',' : ''}${key}=${value}`, '');
+
+        console.log('CONFIG HOOK: runtime key:value pairs:', runtimeEnvVars);
+        console.log('=== End hook: beforeServiceDeploy ===\n');
+
+        const step = {
+          name: 'gcr.io/cloud-builders/gcloud',
+          id: 'setup-runtime-env',
+          entrypoint: 'bash',
+          args: [
+            '-c',
+            `
+            # Extracting and setting runtime environment variables
+            appConfig=$(gcloud secrets versions access latest --secret="your-secret-name")
+            parsedConfig=$(echo "$appConfig" | jq -r 'to_entries | map("\\(.key)=\\(.value|tostring)") | .[]')
+            echo "$parsedConfig" | while read line; do
+                if [[ $line != NEXT_PUBLIC_* ]]; then
+                    echo "export $line" >> /workspace/runtime-env.sh
+                fi
+            done
+            source /workspace/runtime-env.sh
+            `,
+          ],
+          secretEnv: ['GITHUB_PACKAGES_TOKEN'],
+        };
+
+        const yamlStep = yaml.stringify(step);
+        return yamlStep;
+      },
+    },
+    nextConfigHooks: {
       configureNextConfig: async (config, context) => {
         const { projectId, version } = context;
         console.log('\n=== Start hook: configureNextConfig ===');
@@ -63,23 +104,6 @@ async function getConfig() {
                   ...envPublicVars,
                   APP_VERSION: version,
                 },
-        };
-      },
-
-      beforeServiceDeploy: async (context) => {
-        const { projectId, version } = context;
-        console.log('\n=== Start hook: beforeServiceDeploy ===');
-        const appConfig = await getAppConfigSecret(projectId, version);
-        const parsedConfig = JSON.parse(appConfig);
-
-        const runtimeEnvVars = Object.entries(parsedConfig)
-          .filter(([key]) => !key.startsWith('NEXT_PUBLIC_'))
-          .reduce((acc, [key, value]) => `${acc}${acc ? ',' : ''}${key}=${value}`, '');
-
-        console.log('CONFIG HOOK: runtime key:value pairs:', runtimeEnvVars);
-        console.log('=== End hook: beforeServiceDeploy ===\n');
-        return {
-          environmentVariables: runtimeEnvVars,
         };
       },
     },

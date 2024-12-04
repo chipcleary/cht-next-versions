@@ -111,7 +111,7 @@ function ConfigInfo({ envData }) {
           {' '}
           <p>
             {' '}
-            👩‍💻 Not running locally. Config data from{' '}
+            👩‍💻 Running on Google Cloud. Config data from{' '}
             <code>APP_CONFIG_{envData.version.toUpperCase()}</code> displayed.{' '}
           </p>{' '}
           <ConfigData envData={envData} />{' '}

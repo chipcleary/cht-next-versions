@@ -1,7 +1,6 @@
 import yaml from 'yaml';
 import { join } from 'path';
 import { readTemplate } from './processor-utils.js';
-import { generateShellUtils } from './shell-utils-generator.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { logger } from '../logging/logger.js';
@@ -24,16 +23,16 @@ const validateParameters = (options) => {
 /**
  * Processes a cloudbuild.yaml template, injecting hooks and customizing parameters
  * @param {Object} options Processing options
- * @param {Object} options.hooks Hook functions for injecting steps
+ * @param {Object} options.cloudBuildHooks Hook functions for injecting steps
  * @param {string} options.version Version name for deployment
  * @param {string} options.region GCP region
  * @param {string} options.repository Artifact Registry repository name
  * @param {Object} options.context Additional context passed to hooks
- * @returns {Promise<{cloudbuild: string, shellUtils: string}>} Processed YAML and shell utils content
+ * @returns {Promise<{cloudbuild: string}>} Processed YAML and shell utils content
  */
 export default async function processCloudBuildTemplate(options) {
   logger.debug('(processCloudBuildTemplate) Received options:', options);
-  const { version, region, repository } = options;
+  const { version, region, repository, cloudBuildHooks = {} } = options;
 
   validateParameters(options);
 
@@ -48,24 +47,35 @@ export default async function processCloudBuildTemplate(options) {
     _REPOSITORY: repository,
   };
 
-  const shellUtils = await generateShellUtils(options);
-  logger.debug('(processCloudBuildTemplate) Generated shellUtils complete');
+  // Hook replacements for cloudbuild.yaml
+  const hookReplacements = {
+    '# [HOOK: beforeDeploy]': cloudBuildHooks.beforeDeploy
+      ? await cloudBuildHooks.beforeDeploy(options.context)
+      : '',
+    '# [HOOK: beforeBuild]': cloudBuildHooks.beforeBuild
+      ? await cloudBuildHooks.beforeBuild(options.context)
+      : '',
+    '# [HOOK: beforeServiceDeploy]': cloudBuildHooks.beforeServiceDeploy
+      ? await cloudBuildHooks.beforeServiceDeploy(options.context)
+      : '',
+    '# [HOOK: afterDeploy]': cloudBuildHooks.afterDeploy
+      ? await cloudBuildHooks.afterDeploy(options.context)
+      : '',
+  };
 
-  // Use specific YAML formatting options to maintain structure
+  // Replace hooks in buildConfig steps
+  for (const [hookPoint, replacement] of Object.entries(hookReplacements)) {
+    if (replacement) {
+      content = content.replace(hookPoint, replacement);
+    }
+  }
+
   const yamlOptions = {
     lineWidth: 0, // Prevent line wrapping
     indent: 2,
   };
 
-  logger.debug(`(processCloudBuildTemplate) Generated cloudbuild:', ${!!buildConfig}
-  `);
-  logger.debug(`(processCloudBuildTemplate) Generated shellUtils(type): ${typeof shellUtils}`);
-  logger.debug(
-    '(processCloudBuildTemplate) Generated shellUtils (length):',
-    shellUtils?.length || 0
-  );
-  return {
-    cloudbuild: yaml.stringify(buildConfig, yamlOptions),
-    shellUtils,
-  };
+  logger.debug(`(processCloudBuildTemplate) Generated cloudbuild:', ${!!buildConfig}`);
+
+  return yaml.stringify(buildConfig, yamlOptions);
 }

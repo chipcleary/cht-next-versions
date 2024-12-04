@@ -42,10 +42,10 @@ steps:
   # [HOOK: afterDeploy]
 
 substitutions:
-  _APP_VERSION: 'TEST'
-  _REGION: 'us-central1'
-  _REPOSITORY: 'cloud-run-source-deploy'
-  _GITHUB_PACKAGES_TOKEN: '' # This will be set in Cloud Build UI
+  _APP_VERSION: ''
+  _REGION: ''
+  _REPOSITORY: ''
+  _GITHUB_PACKAGES_TOKEN: '' # This needs to be set manually (e.g., in Cloud Build UI)
 
 options:
   logging: CLOUD_LOGGING_ONLY
