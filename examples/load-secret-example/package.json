@@ -10,7 +10,7 @@
     "deploy": "node scripts/deploy.js"
   },
   "dependencies": {
-    "@chipcleary/cht-next-versions": "^0.0.2-beta.7",
+    "@chipcleary/cht-next-versions": "^0.0.2-beta.8",
     "next": "^14.2.18",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

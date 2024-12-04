@@ -35,10 +35,10 @@ export async function generateDeploymentFiles(version, projectId, config) {
 
   // Process cloudbuild template with hooks
   const cloudbuild = await processCloudBuildTemplate({
+    projectId,
     version,
     region: config.region,
     repository: config.repository,
-    projectId,
     cloudBuildHooks: config.cloudBuildHooks,
   });
   logger.debug('✓ Generated cloudbuild.yaml');
