@@ -99,7 +99,7 @@ function ConfigInfo({ envData }) {
   return (
     <div>
       {envData?.isLocal ? (
-        <div className="mt-4 p-4 rounded-md bg-red-50">
+        <div className="mt-4 p-4 rounded-md bg-red-100">
           <p>
             👩‍💻 Running locally in development mode. Config data from{' '}
             <code className="px-2 py-1 bg-gray-100 rounded">.env.development</code> displayed.
@@ -107,7 +107,7 @@ function ConfigInfo({ envData }) {
           <ConfigData envData={envData} />
         </div>
       ) : (
-        <div className="mt-4 p-4 rounded-md bg-red-50">
+        <div className="mt-4 p-4 rounded-md bg-blue-100">
           {' '}
           <p>
             {' '}

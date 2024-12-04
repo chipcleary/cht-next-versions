@@ -1,6 +1,7 @@
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { readTemplate, replaceHooks } from './processor-utils.js';
+import { logger } from '../logging/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
